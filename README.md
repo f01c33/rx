@@ -1,4 +1,4 @@
-# regex tester (rx)
+# Regex eXplorer (rx)
 
 #### Instalation
 ```bash
