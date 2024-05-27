@@ -14,8 +14,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var kwStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Background(lipgloss.Color("235"))
-var outterStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Padding(0, 0, 0, 3)
+var (
+	kwStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("204")).Background(lipgloss.Color("235"))
+	outterStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Padding(0, 0, 0, 3)
+)
 
 func main() {
 	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
@@ -115,12 +117,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		out := ""
 		for len(idxs) > 0 {
 			if currI == len(idxs) {
-				out += string(txt[idxs[currI-1][1]:])
+				out += txt[idxs[currI-1][1]:]
 				break
 			}
 			if i <= idxs[currI][0] {
-				out += string(txt[i:idxs[currI][0]])
-				out += kwStyle.Render(string(txt[idxs[currI][0]:idxs[currI][1]]))
+				out += txt[i:idxs[currI][0]]
+				out += kwStyle.Render(txt[idxs[currI][0]:idxs[currI][1]])
 				i = idxs[currI][1]
 				currI++
 				continue
