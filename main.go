@@ -1,17 +1,17 @@
 package main
 
-// A simple program demonstrating the textarea component from the Bubbles
-// component library.
-
 import (
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"regexp"
 
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mattn/go-isatty"
 )
 
 var (
@@ -20,7 +20,17 @@ var (
 )
 
 func main() {
-	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
+	var data []byte
+	var err error
+
+	if !isatty.IsTerminal(os.Stdin.Fd()) && !isatty.IsCygwinTerminal(os.Stdin.Fd()) {
+		data, err = io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}
+
+	p := tea.NewProgram(initialModel(data), tea.WithAltScreen())
 
 	if m, err := p.Run(); err != nil {
 		log.Fatal(err)
@@ -43,13 +53,14 @@ type model struct {
 	err    error
 }
 
-func initialModel() model {
+func initialModel(input []byte) model {
 	ti := textinput.New()
 	ti.Placeholder = "regex here"
 
 	rx, _ := regexp.Compile(".")
 	oldRX := "."
 	text := textarea.New()
+	text.SetValue(string(input))
 
 	text.Focus()
 	return model{
