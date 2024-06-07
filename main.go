@@ -153,7 +153,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *model) sizeInputs() {
 	m.text.SetWidth(m.width)
-	m.text.SetHeight(m.height/2 - 1)
+	m.text.SetHeight(m.height/2 - 2)
 	outterStyle = outterStyle.Width(m.width - 2).Height(m.height/2 - 2)
 }
 
