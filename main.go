@@ -46,8 +46,6 @@ type model struct {
 	text   textarea.Model
 	out    string
 	rx     *regexp.Regexp
-	oldRX  string
-	oldTxt string
 	width  int
 	height int
 	err    error
@@ -58,7 +56,6 @@ func initialModel(input []byte) model {
 	ti.Placeholder = "regex here"
 
 	rx, _ := regexp.Compile(".")
-	oldRX := "."
 	text := textarea.New()
 	text.SetValue(string(input))
 
@@ -67,7 +64,6 @@ func initialModel(input []byte) model {
 		regex: ti,
 		rx:    rx,
 		text:  text,
-		oldRX: oldRX,
 		err:   nil,
 	}
 }
@@ -111,43 +107,37 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.text, cmd = m.text.Update(msg)
 	cmds = append(cmds, cmd)
 
-	newRX := m.regex.Value()
-	newTXT := m.text.Value()
-	if newRX != m.oldRX || newTXT != m.oldTxt {
-		rx, err := regexp.Compile(m.regex.Value())
-		m.rx = rx
-		m.err = err
-		if err != nil {
-			return m, tea.Batch(cmds...)
-		}
-		txt := m.text.Value()
-		idxs := rx.FindAllStringIndex(txt, -1)
-		_ = idxs
-		i := 0
-		currI := 0
-		out := ""
-		for len(idxs) > 0 {
-			if currI == len(idxs) {
-				out += txt[idxs[currI-1][1]:]
-				break
-			}
-			if i <= idxs[currI][0] {
-				out += txt[i:idxs[currI][0]]
-				out += kwStyle.Render(txt[idxs[currI][0]:idxs[currI][1]])
-				i = idxs[currI][1]
-				currI++
-				continue
-			} else {
-				break
-			}
-		}
-		if len(idxs) == 0 {
-			out = txt
-		}
-		m.out = out
-		m.oldRX = newRX
-		m.oldTxt = newTXT
+	rx, err := regexp.Compile(m.regex.Value())
+	m.rx = rx
+	m.err = err
+	if err != nil {
+		return m, tea.Batch(cmds...)
 	}
+	txt := m.text.Value()
+	idxs := rx.FindAllStringIndex(txt, -1)
+	_ = idxs
+	i := 0
+	currI := 0
+	out := ""
+	for len(idxs) > 0 {
+		if currI == len(idxs) {
+			out += txt[idxs[currI-1][1]:]
+			break
+		}
+		if i <= idxs[currI][0] {
+			out += txt[i:idxs[currI][0]]
+			out += kwStyle.Render(txt[idxs[currI][0]:idxs[currI][1]])
+			i = idxs[currI][1]
+			currI++
+			continue
+		} else {
+			break
+		}
+	}
+	if len(idxs) == 0 {
+		out = txt
+	}
+	m.out = out
 	return m, tea.Batch(cmds...)
 }
 
